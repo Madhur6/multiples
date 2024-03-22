@@ -1,0 +1,29 @@
+{% extends 'hello/layout.html' %}
+{% load static %}
+{% load filters %}
+
+{% block body %}
+<h2> INDEX {{request.user.username}} </h2>
+
+<h3> YOUR UPLOADS </h3>
+
+<select name="uploads" id="uploads">
+    <option disabled selected value="">select</option>
+    {% for image in user_images %}
+    <option value="{{image.image.url}}"> {{image.image.name|filename}} </option>
+    {% endfor %}
+</select>
+<button onclick="copyToClipboard()">Copy URL</button>
+
+<hr>
+<a href="{% url 'addNote' %}"> add note </a>
+
+<a href="{% url 'logout' %}"> logout </a>
+
+<script>
+    function copyToClipboard() {
+        var copyText = document.getElementById("uploads");
+        navigator.clipboard.writeText(copyText.value);
+    }
+    </script>
+{% endblock %}

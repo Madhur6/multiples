@@ -1,0 +1,23 @@
+{% extends 'hello/layout.html' %}
+{% load static %}
+
+{% block body %}
+<div>
+    {% if message %}
+    <div> {{message}} </div>
+    {% endif %}
+</div>
+
+<form action="{% url 'login' %}" method="post">
+    {% csrf_token %}
+    <div class="form-group">
+        <input type="text" name="username" id="username" placeholder="enter username" autofocus autocomplete="off">
+    </div>
+
+    <div class="form-group">
+        <input type="password" name="password" id="password" placeholder="enter password" autocomplete="off">
+    </div>
+    <button type="submit"> login </button>
+</form>
+don't have account? <a href="{% url 'register' %}"> register </a>
+{% endblock %}

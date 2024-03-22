@@ -1,0 +1,33 @@
+{% extends 'hello/layout.html' %}
+{% load static %}
+{% load filters %}
+
+{% block body %}
+<h2> Add note </h2>
+
+<div>
+  {% if message %}
+  <p> {{message}} </p>
+  {% endif %}
+</div>
+
+<div>
+    <form action="{% url 'addNote' %}" method="post" class="note-form" enctype="multipart/form-data">{% csrf_token %}
+        <div class="form-group">
+          <label for="note-title">Title</label>
+          <input type="text" name="title" class="form-control" id="note-title" placeholder="Enter Title" required>
+        </div>
+        <div class="form-group">
+          <label for="note-description">Description</label>
+          <textarea type="text" name="text" class="form-control" id="note-description" placeholder="Description here"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="note-image">Images</label>
+          <input type="file" name="images" class="form-control-file" id="note-image" multiple>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+</div>
+
+<a href="{% url 'logout' %}"> logout </a>
+{% endblock %}
