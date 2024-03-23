@@ -10,6 +10,7 @@ urlpatterns = [
     path('register', views.register, name='register'),
 
     path('addNote', views.addNoteView, name='addNote'),
+    path('delete/', views.delete_images, name='deleteImages'),
     # path('get_image_url/<int:image_id>/', views.get_image_url, name='get_image_url'),
     path('get-temporary-image-url/<int:image_id>/', views.get_temporary_image_url, name='get_temporary_image_url'),
     path('get-image/<str:signed_value>/', views.get_image, name='get_image'),

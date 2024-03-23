@@ -7,19 +7,32 @@
 
 <h3> YOUR UPLOADS </h3>
 
-<select name="uploads" id="uploads">
-    <option disabled selected value="">select</option>
+<form id="deleteForm" method="post" action="{% url 'deleteImages' %}">
+  {% csrf_token %}
+  <select name="uploads" id="uploads">
+      <option disabled selected value="">select</option>
+      {% for image in user_images %}
+      <option value="{{image.id}}"> {{image.image.name|filename}} </option>
+      {% endfor %}
+  </select>
+  <button onclick="copyToClipboard()">Copy URL</button>
+
+  <!-- Add checkboxes for image selection -->
+  <div id="imageSelection">
     {% for image in user_images %}
-    <option value="{{image.id}}"> {{image.image.name|filename}} </option>
+    <input type="checkbox" name="image_ids" value="{{ image.id }}">
+    <label>{{ image.image.name|filename }}</label><br>
     {% endfor %}
-</select>
-<button onclick="copyToClipboard()">Copy URL</button>
+  </div>
 
-<img id="selectedImage" src="/get-image/69-1711163091:8-uKHACmPdN6M6bd1QIwTcV2rKSKAC8CSfBKg56Axzg/">
-<hr>
-<a href="{% url 'addNote' %}"> add note </a>
+  <!-- Add button to delete selected images -->
+  <button type="button" onclick="deleteImages()">Delete Selected</button>
 
-<a href="{% url 'logout' %}"> logout </a>
+  <img id="selectedImage" src="/get-image/82-1711167062:uRJAqVbAfq_3n0ydibVZobcEhAJNWAqHu2fBQJLP_OI/">
+  <hr>
+  <a href="{% url 'addNote' %}"> add note </a>
+  <a href="{% url 'logout' %}"> logout </a>
+</form>
 
 <script>
     // function copyToClipboard() {
@@ -66,6 +79,36 @@
                 console.error('Error:', error);
                 alert("Failed to fetch temporary image URL.");
             });
+
+      // Prevent the default form submission behavior
+      event.preventDefault();
     }
+
+    // Function to delete selected images
+    function deleteImages() {
+        var selectedImageIds = [];
+        var checkboxes = document.querySelectorAll('input[name="image_ids"]:checked');
+        checkboxes.forEach(function(checkbox) {
+          selectedImageIds.push(checkbox.value);
+        });
+
+        if (selectedImageIds.length === 0) {
+          alert("Please select images to delete.");
+          return;
+        }
+
+        // Add selected image IDs to the form for submission
+        var deleteForm = document.getElementById("deleteForm");
+        selectedImageIds.forEach(function(imageId) {
+          var input = document.createElement("input");
+          input.setAttribute("type", "hidden");
+          input.setAttribute("name", "selected_image_ids");
+          input.setAttribute("value", imageId);
+          deleteForm.appendChild(input);
+        });
+
+        // Submit the form
+        deleteForm.submit();
+      }
     </script>
 {% endblock %}

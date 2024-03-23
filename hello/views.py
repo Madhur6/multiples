@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 
 from django.http import JsonResponse, HttpResponse
-from django.core.signing import Signer
+from django.core.signing import Signer, BadSignature
 from django.utils import timezone
 from datetime import timedelta
 
@@ -55,7 +55,7 @@ def get_image(request, signed_value):
         # else:
         #     return HttpResponse('Link expired.', status=403)
 
-    except (signer.BadSignature, ValueError, Images.DoesNotExist):
+    except (BadSignature, ValueError, Images.DoesNotExist):
         return HttpResponse('Invalid link.', status=403)
 
 def addNoteView(request):
@@ -70,13 +70,22 @@ def addNoteView(request):
                 text = form.cleaned_data['text']
                 note_obj = Note.objects.create(user=user,title=title,text=text) #create will create as well as save too in db.
 
+                # Count the total number of images uploaded by the user
+                total_images_count = Images.objects.filter(note__user=user).count()
+
+                # Check if the user has exceeded the maximum limit (10 images)
+                if total_images_count + len(request.FILES.getlist('images')) > 10:
+                    raise ValidationError("You can upload a maximum of 10 images. Delete some previous images to add more.")
+
+
+
                 images = request.FILES.getlist('images')
                 # Check if the number of images exceeds 5
                 if images and len(images) > 3:
                     raise ValidationError("You can upload a maximum of 3 images.")
             
                 for image in images:
-                    if image.size > 1*1024*1024:
+                    if image.size > settings.MAX_UPLOAD_SIZE*1024*1024:
                         raise ValidationError(f"Image file {image.name} exceeds {settings.MAX_UPLOAD_SIZE} MB size limit")
                     Images.objects.create(note=note_obj, image=image)
 
@@ -88,6 +97,15 @@ def addNoteView(request):
         else:
             print("Form invalid")
     return render(request, 'hello/addNote.html')
+
+def delete_images(request):
+    if request.method == "POST":
+        selected_image_ids = request.POST.getlist('selected_image_ids')
+
+        # Delete selected images
+        Images.objects.filter(id__in=selected_image_ids).delete()
+
+    return redirect('index')
 
 def login_view(request):
     if request.method == "POST":
