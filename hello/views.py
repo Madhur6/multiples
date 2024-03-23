@@ -8,6 +8,11 @@ from .forms import NoteForm, NoteFullForm
 from django.core.exceptions import ValidationError
 from django.conf import settings
 
+from django.http import JsonResponse, HttpResponse
+from django.core.signing import Signer
+from django.utils import timezone
+from datetime import timedelta
+
 # Create your views here.
 def index(request):
     if not request.user.is_authenticated:
@@ -16,6 +21,42 @@ def index(request):
     return render(request, 'hello/index.html', {
         'user_images': user_images
     })
+
+# def get_image_url(request, image_id):
+#     try:
+#         image = Images.objects.get(id=image_id)
+#         image_url = image.image.url
+#         return JsonResponse({'image_url': image_url})
+#     except Images.DoesNotExist:
+#         return JsonResponse({'error': 'Image not found'}, status=404)
+    
+
+def get_temporary_image_url(request, image_id):
+    try:
+        image = Images.objects.get(id=image_id)
+        image_url = image.image.url
+        signer = Signer()
+        timestamp = int(timezone.now().timestamp())
+        signed_value = signer.sign(f'{image_id}-{timestamp}')
+        return JsonResponse({'image_url': f'/get-image/{signed_value}/'})
+    except Images.DoesNotExist:
+        return JsonResponse({'error': 'Image not found'}, status=404)
+
+def get_image(request, signed_value):
+    signer = Signer()
+    try:
+        image_id, timestamp = signer.unsign(signed_value).split('-')
+        image = Images.objects.get(id=image_id)
+        return redirect(image.image.url)
+    
+        # Check if the request is made within a certain time window (e.g., 5 minutes)
+        # if int(timezone.now().timestamp()) - int(timestamp) <= 300:  
+        #     return redirect(image.image.url)
+        # else:
+        #     return HttpResponse('Link expired.', status=403)
+
+    except (signer.BadSignature, ValueError, Images.DoesNotExist):
+        return HttpResponse('Invalid link.', status=403)
 
 def addNoteView(request):
     if request.method == "POST":

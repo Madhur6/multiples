@@ -10,20 +10,62 @@
 <select name="uploads" id="uploads">
     <option disabled selected value="">select</option>
     {% for image in user_images %}
-    <option value="{{image.image.url}}"> {{image.image.name|filename}} </option>
+    <option value="{{image.id}}"> {{image.image.name|filename}} </option>
     {% endfor %}
 </select>
 <button onclick="copyToClipboard()">Copy URL</button>
 
+<img id="selectedImage" src="/get-image/69-1711163091:8-uKHACmPdN6M6bd1QIwTcV2rKSKAC8CSfBKg56Axzg/">
 <hr>
 <a href="{% url 'addNote' %}"> add note </a>
 
 <a href="{% url 'logout' %}"> logout </a>
 
 <script>
+    // function copyToClipboard() {
+    //     var copyText = document.getElementById("uploads");
+    //     navigator.clipboard.writeText(copyText.value);
+    // }
+
+    // function copyToClipboard() {
+    //     var imageId = document.getElementById("uploads").value;
+    //     if (!imageId) return;
+
+    //     fetch(`get_image_url/${imageId}/`)
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             if (data.image_url) {
+    //                 navigator.clipboard.writeText(data.image_url);
+    //                 alert("Image URL copied to clipboard!");
+    //             } else {
+    //                 alert("Failed to fetch image URL.");
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('Error:', error);
+    //             alert("Failed to fetch image URL.");
+    //         });
+    // }
+
+
     function copyToClipboard() {
-        var copyText = document.getElementById("uploads");
-        navigator.clipboard.writeText(copyText.value);
+        var imageId = document.getElementById("uploads").value;
+        if (!imageId) return;
+
+        fetch(`/get-temporary-image-url/${imageId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.image_url) {
+                    navigator.clipboard.writeText(data.image_url);
+                    alert("Temporary Image URL copied to clipboard!");
+                } else {
+                    alert("Failed to fetch temporary image URL.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Failed to fetch temporary image URL.");
+            });
     }
     </script>
 {% endblock %}

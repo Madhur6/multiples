@@ -9,7 +9,10 @@ urlpatterns = [
     path('logout', views.logout_view, name='logout'),
     path('register', views.register, name='register'),
 
-    path('addNote', views.addNoteView, name='addNote')
+    path('addNote', views.addNoteView, name='addNote'),
+    # path('get_image_url/<int:image_id>/', views.get_image_url, name='get_image_url'),
+    path('get-temporary-image-url/<int:image_id>/', views.get_temporary_image_url, name='get_temporary_image_url'),
+    path('get-image/<str:signed_value>/', views.get_image, name='get_image'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
